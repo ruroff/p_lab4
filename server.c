@@ -12,7 +12,7 @@
 #define def_port 3425 
     
 
-void receive_transmit(int sock, int mode)
+void receive_transmit(int sock, int mode)           //function for transmit and receive 
 {
     char buf_in[128];
     char buf_out[512];
@@ -32,18 +32,18 @@ void receive_transmit(int sock, int mode)
 
     select(sock + 1, &fdrt, NULL, NULL, &time_v);
                 
-    bytes_read = recv(sock, buf_in, 100, 0);
+    bytes_read = recv(sock, buf_in, 100, 0);                    //reading command from socket
     printf("%s\n", buf_in);
     if(bytes_read <= 0) _exit(0);
                 
-    if ((ptr = popen(buf_in, "r")) > 0){
+    if ((ptr = popen(buf_in, "r")) > 0){                        //run command
 
-        while (fgets(buf_out, sizeof(buf_out) -1, ptr) > 0){
+        while (fgets(buf_out, sizeof(buf_out) -1, ptr) > 0){    //write the response to the socket
             send(sock, buf_out, strlen(buf_out), 0);
             usleep(1);
            }
     }
-    pclose(ptr);
+    pclose(ptr);                                                
     close(sock);
     if(mode == 0){
         _exit(0);
@@ -52,7 +52,7 @@ void receive_transmit(int sock, int mode)
 
 //-------------------------------------------------
 
-void * thread_func(void *arg)
+void * thread_func(void *arg)                                   //new thread function
 {
 
     receive_transmit(*(int*) arg, 1);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     int sockaddr_size, *sock_info;
         
     
-    listener = socket(AF_INET, SOCK_STREAM, 0);
+    listener = socket(AF_INET, SOCK_STREAM, 0);                 //create a socket
     
     if(listener < 0)
     {
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     
         if((strcmp(argv[1], "-process") == 0)) 
         {
-              switch(fork())
+              switch(fork())                                                    //create new process
             {
             case -1:
                 perror("fork");
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         else if((strcmp(argv[1], "-pthreads") == 0))
         {
 
-            pthread_t thread1;
+            pthread_t thread1;                                                   //create new thread
             if(pthread_create(&thread1, NULL, thread_func, &sock) < 0)
             {
                 perror("thread");
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
     }
     
-    close(listener);
+    
 
     return 0;
 }
